@@ -1,25 +1,34 @@
 To reporoduce the vulnerability just follow the steps below:
 
-Step 1: Clone the fresh osv-scalibr source code:
+- Step 1: Clone the fresh osv-scalibr source code:
+	```
 	$ git clone https://github.com/google/osv-scalibr
+	```
 
-Step 2: Remove the code mentioned in fix commit https://github.com/google/osv-scalibr/commit/e67c4e198ca099cb7c16957a80f6c5331d90a672
+- Step 2: Remove the code mentioned in fix commit https://github.com/google/osv-scalibr/commit/e67c4e198ca099cb7c16957a80f6c5331d90a672
 
-Step 3: Use the vmdk.go.patch patch and apply it to vmdk.go with:
+- Step 3: Use the vmdk.go.patch patch and apply it to vmdk.go with:
+	```
 	$ cd osv-scalibr
 	$ git apply /path/to/vmdk.go.patch
+	```
 
-	Why do we need these changes to vmdk.go ?
-		This is required to trigger the bug. The bug triggers when someone writes their own plugin which traverses a virtual filesystem contained inside a file. The bug is in the way osv-scalibr handles virtual filesystems. This bug will go unnoticed during compilation or production but it'll get triggered when user supplies a vmdk file which contains at least one empty directory.
-		This is just an example and this bug is not just limited to vmdk plugin.
+	- Why do we need these changes to vmdk.go ?
 
-Step 4: Compile the source code to get the "scalibr" binary:
+		This is just an example and this bug is not just limited to vmdk plugin. This is required to trigger the bug. The bug triggers when someone writes their own plugin which traverses a virtual filesystem contained inside a file. The bug is in the way osv-scalibr handles virtual filesystems. This bug will go unnoticed during compilation or production but it'll get triggered when user supplies a vmdk file which contains at least one empty directory.
+		
+
+- Step 4: Compile the source code to get the "scalibr" binary:
+	```
 	$ make clean && make
+	```
 
-Step 5: Trigger with:
+- Step 5: Trigger with:
+	```
 	$ go test -v ./extractor/filesystem/embeddedfs/vmdk/
 
 		Expected output:
+
 		...
 			=== RUN   TestExtractValidVMDK/DiskImage_1
     			vmdk_test.go:87: GetEmbeddedFS() failed: unsupported filesystem type unknown for partition 2
@@ -30,7 +39,7 @@ Step 5: Trigger with:
 				panic: runtime error: invalid memory address or nil pointer dereference
 			[signal SIGSEGV: segmentation violation code=0x1 addr=0x20 pc=0x7613e2]
 		...
-
+	```
 
 	OR
 
@@ -57,13 +66,14 @@ Step 5: Trigger with:
 
 	Now,
 
+	```
 	$ chmod +x gen_malicious_vmdk.sh
 	$ ./gen_malicious_vmdk.sh
+	```
 
 	It will create a file called "malicious.vmdk". Now trigger the vulnerability with:
-
+	```
 	$ ./scalibr --extractors=embeddedfs/vmdk -o textproto=output.txt malicious.vmdk
-
 
 		Expected output:
 
@@ -77,3 +87,4 @@ Step 5: Trigger with:
 				panic: runtime error: invalid memory address or nil pointer dereference
 			[signal SIGSEGV: segmentation violation code=0x1 addr=0x10 pc=0x1fbb303]
 			...
+	```
