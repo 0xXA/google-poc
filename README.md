@@ -1,4 +1,4 @@
-To reporoduce the vulnerability just follow the steps below:
+To reporoduce the CVE-2025-13425 just follow the steps below:
 
 - Step 1: Clone the fresh osv-scalibr source code:
 	```
@@ -88,3 +88,5 @@ To reporoduce the vulnerability just follow the steps below:
 			[signal SIGSEGV: segmentation violation code=0x1 addr=0x10 pc=0x1fbb303]
 			...
 	```
+
+CVE-2025-13425 discovered by Yuvraj Saxena (ysaxenax@gmail.com)
